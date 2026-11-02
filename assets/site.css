@@ -168,3 +168,22 @@ body.lock{overflow:hidden}
 .more-txt{margin-top:8px;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--line);background:var(--surface2);color:var(--brand);font:inherit;font-weight:800;cursor:pointer}
 @media (min-width:641px){.more-txt{display:none}}
 .own{border-color:var(--sun)}.own .thumb img{object-position:50% 0}
+/* guides, top picks, FAQ, link blocks */
+.guide{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:30px}
+.guide .box{margin:0}
+.g-txt h2{font-size:1.2rem;margin-top:1.1em}.g-txt h2:first-child{margin-top:0}
+.g-txt p,.faq p,.picks li{max-width:75ch}
+.picks h2{display:flex;align-items:center;gap:8px}.picks h2::before{content:"⭐";font-size:1.1em}
+.picks ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.picks li{padding:12px 14px;border-radius:var(--r-sm);background:var(--surface2);line-height:1.45}
+.picks li a{font-weight:800}
+.pk-fact{color:var(--muted);font-size:.9rem;font-weight:700;white-space:nowrap}
+.faq{margin-top:20px}
+.faq .qa{padding:12px 0;border-top:2px dashed var(--line)}.faq .qa:first-of-type{border-top:0;padding-top:4px}
+.faq h3{font-size:1.05rem;margin:0 0 .3em}
+.pop{margin:24px 0}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.links .chip{min-height:40px;padding:0 14px;font-size:.92rem}
+.lede{font-weight:700}
+.why{padding:12px 14px;border-radius:var(--r-sm);background:var(--surface2)}
+@media (max-width:860px){.guide{grid-template-columns:1fr}}
