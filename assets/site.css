@@ -267,3 +267,20 @@ body.lock{overflow:hidden}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}}
 @media (max-width:700px){.studio .thumb{width:84px}.wrap{padding:0 16px}.rail{padding:6px 16px;margin:-6px -16px;scroll-padding:0 16px}.box{padding:16px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.row.pre{opacity:1}}
+
+/* mascot */
+.hero{position:relative}
+.hero .mascot{position:absolute;right:14px;bottom:-6px;width:92px;height:134px;pointer-events:auto}
+.hero .mascot img{position:absolute;inset:auto 0 0 auto;width:100%;height:auto;transform-origin:50% 100%}
+.hero .mascot .m-a{animation:m-bob 2.6s ease-in-out infinite}
+.hero .mascot .m-b{opacity:0}
+.hero:hover .mascot .m-a{opacity:0}
+.hero:hover .mascot .m-b{opacity:1;animation:m-hop .55s var(--ease) infinite alternate}
+.hero.nf .mascot{position:relative;right:auto;bottom:auto;margin:8px auto 0;width:120px;height:198px}
+.hero.nf .mascot .m-a{animation:m-snooze 3.4s ease-in-out infinite}
+@keyframes m-bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-2deg)}}
+@keyframes m-hop{from{transform:translateY(0)}to{transform:translateY(-10px) rotate(3deg)}}
+@keyframes m-snooze{0%,100%{transform:scale(1,1)}50%{transform:scale(1.03,.97)}}
+@media (max-width:760px){.hero .mascot{width:58px;height:85px;right:8px}}
+@media (prefers-reduced-motion:reduce){.hero .mascot img{animation:none!important}}
+.hero{padding-right:110px;min-height:120px}@media (max-width:760px){.hero{padding-right:70px;min-height:0}}
