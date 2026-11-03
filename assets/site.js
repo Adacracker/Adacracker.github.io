@@ -39,21 +39,33 @@
     head.appendChild(nav); upd();
   });
 
-  // hero cabin watches the pointer
-  var eyes = d.querySelector('.h-eyes'), hero = eyes && eyes.closest('.hero');
-  if (eyes && !still && matchMedia('(hover: hover)').matches) {
-    hero.addEventListener('pointermove', function (e) {
-      var r = hero.getBoundingClientRect();
-      var x = ((e.clientX - r.left) / r.width - 0.6) * 14, y = ((e.clientY - r.top) / r.height - 0.6) * 10;
-      eyes.style.transform = 'translate(' + Math.max(-7, Math.min(7, x)).toFixed(1) + 'px,' + Math.max(-5, Math.min(5, y)).toFixed(1) + 'px)';
+  // menu: drawer on small screens, collapse to an icon rail on desktop
+  var menu = d.getElementById('menu'), side = d.getElementById('side'), scrim = d.getElementById('scrim');
+  var wide = matchMedia('(min-width: 1024px)');
+  function drawer(open) {
+    root.classList.toggle('drawer', open);
+    menu.setAttribute('aria-expanded', open);
+    if (open) { var a = side.querySelector('a'); if (a) a.focus(); } else menu.focus();
+  }
+  if (menu && side) {
+    if (wide.matches) menu.setAttribute('aria-expanded', root.dataset.side !== 'mini');
+    menu.addEventListener('click', function () {
+      if (wide.matches) {
+        var mini = root.dataset.side !== 'mini';
+        if (mini) root.dataset.side = 'mini'; else delete root.dataset.side;
+        menu.setAttribute('aria-expanded', !mini);
+        try { if (mini) localStorage.setItem('side', 'mini'); else localStorage.removeItem('side'); } catch (e) {}
+      } else drawer(!root.classList.contains('drawer'));
     });
-    hero.addEventListener('pointerleave', function () { eyes.style.transform = ''; });
+    scrim.addEventListener('click', function () { drawer(false); });
+    d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('drawer')) drawer(false); });
+    wide.addEventListener('change', function () { if (root.classList.contains('drawer')) drawer(false); menu.setAttribute('aria-expanded', wide.matches ? root.dataset.side !== 'mini' : false); });
   }
 
   // theme toggle
   var tb = d.getElementById('theme');
   if (tb) tb.addEventListener('click', function () {
-    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    var dark = root.dataset.theme !== 'light';                 // dark is the default
     root.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
   });
