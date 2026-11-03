@@ -1,5 +1,54 @@
 (function () {
   var d = document, root = d.documentElement;
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('js');
+
+  // thumbnails: shimmer until loaded (load events don't bubble, so listen in the capture phase)
+  function done(img) { var t = img.closest && img.closest('.thumb'); if (t) t.classList.add('ld'); }
+  d.addEventListener('load', function (e) { if (e.target.tagName === 'IMG') done(e.target); }, true);
+  d.addEventListener('error', function (e) { if (e.target.tagName === 'IMG') done(e.target); }, true);
+  d.querySelectorAll('.thumb img').forEach(function (img) { if (img.complete) done(img); });
+
+  // rows below the fold fade up as they scroll in
+  if ('IntersectionObserver' in window && !still) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.remove('pre'); e.target.classList.add('in'); io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -6% 0px' });
+    d.querySelectorAll('main .row').forEach(function (r) {
+      if (r.getBoundingClientRect().top > innerHeight) { r.classList.add('pre'); io.observe(r); }
+    });
+  }
+
+  // rail arrows (pointer devices only; hidden by CSS on touch)
+  d.querySelectorAll('.row .rail:not(.rail-studio)').forEach(function (rail) {
+    var head = rail.parentNode.querySelector('.row-head');
+    if (!head) return;
+    var nav = d.createElement('div'); nav.className = 'rail-nav';
+    var use = function (n) { return '<svg class="i" aria-hidden="true"><use href="/assets/icons.svg#' + n + '"/></svg>'; };
+    nav.innerHTML = '<button type="button" aria-label="Scroll left">' + use('left') + '</button><button type="button" aria-label="Scroll right">' + use('right') + '</button>';
+    var b = nav.querySelectorAll('button');
+    function upd() { b[0].disabled = rail.scrollLeft < 4; b[1].disabled = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 4; }
+    [-1, 1].forEach(function (dir, i) {
+      b[i].addEventListener('click', function () { rail.scrollBy({ left: dir * rail.clientWidth * 0.85, behavior: still ? 'auto' : 'smooth' }); });
+    });
+    var tick = 0;
+    rail.addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(function () { tick = 0; upd(); }); }, { passive: true });
+    head.appendChild(nav); upd();
+  });
+
+  // hero cabin watches the pointer
+  var eyes = d.querySelector('.h-eyes'), hero = eyes && eyes.closest('.hero');
+  if (eyes && !still && matchMedia('(hover: hover)').matches) {
+    hero.addEventListener('pointermove', function (e) {
+      var r = hero.getBoundingClientRect();
+      var x = ((e.clientX - r.left) / r.width - 0.6) * 14, y = ((e.clientY - r.top) / r.height - 0.6) * 10;
+      eyes.style.transform = 'translate(' + Math.max(-7, Math.min(7, x)).toFixed(1) + 'px,' + Math.max(-5, Math.min(5, y)).toFixed(1) + 'px)';
+    });
+    hero.addEventListener('pointerleave', function () { eyes.style.transform = ''; });
+  }
 
   // theme toggle
   var tb = d.getElementById('theme');
@@ -104,6 +153,8 @@
       f.title = stage.dataset.title;
       f.allow = 'autoplay; fullscreen *; gamepad *; accelerometer; gyroscope; clipboard-write';
       f.setAttribute('allowfullscreen', '');
+      // keep the game inside our page: no pop-ups, no new tabs, no navigating our page away
+      if (stage.dataset.sandbox !== 'off') f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-pointer-lock allow-orientation-lock allow-forms allow-modals allow-presentation');
       f.setAttribute('scrolling', 'no');
       stage.appendChild(f);
       stage.classList.add('on');
@@ -118,7 +169,15 @@
     function fullscreen() {
       start();
       var el = stage, req = el.requestFullscreen || el.webkitRequestFullscreen;
-      if (req && !small()) { try { req.call(el); return; } catch (e) {} }
+      if (req && !small()) {
+        try {
+          var pr = req.call(el);
+          if (pr && pr.catch) pr.catch(function () {});
+          // blocked, denied or never granted: fall back to the in-page theater mode
+          setTimeout(function () { if (!(d.fullscreenElement || d.webkitFullscreenElement)) theater(true); }, 700);
+          return;
+        } catch (e) {}
+      }
       theater(true);
     }
     playBtn.addEventListener('click', start);
